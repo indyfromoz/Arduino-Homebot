@@ -1,3 +1,4 @@
+
 /*
  Copyright (c) 2013 indrajit Chakrabarty (indyfromoz@gmail.com)
 
@@ -17,12 +18,14 @@
 
 /* 
 
- This sketch uses a BMP085 temperature+pressure sensor connected to an Arduino along with a 433MHz 
- transmitter. The Adafruit BMP085 library is used for the temperature, pressure and altitude 
- measurements. The VirtualWire library is used for the setup and message transmission with the 
- 433MHz TX module . 
+ This sketch uses a BMP085 temperature+pressure sensor and a DHT11 temperature+humidity sensor 
+ connected to an Arduino along with a 433MHz transmitter. The Adafruit BMP085 library is used for 
+ the temperature, pressure and altitude measurements with the BMP085. The Adafruit DHT11/DHT22 
+ library is used for the measurement of temperature and relative humidity. The VirtualWire library 
+ is used for the setup and message transmission with the 433MHz TX module . 
  
  Adafruit BMP085 library - https://github.com/adafruit/Adafruit-BMP085-Library
+ Adafruit DHT sensor library - https://github.com/adafruit/DHT-sensor-library
  VirtualWire library - http://www.open.com.au/mikem/arduino/VirtualWire/index.html
 
  The PIN connections in the sketch are as - 
@@ -33,18 +36,36 @@
            SCL = Analog Pin # 5
            SDA = Analog Pin # 4
 
+ DHT11 - 
+         VCC  = 5V
+         DATA = Digital Pin # 2 (A 10K resistor is used as a pull up)
+         GND  = ground rail
+
  433MHz Tx - 
            TX  = Digital Pin # 12
            VCC = 5V
            GND = ground rail
 */
 
+/* 
+
+  Current version: 0.1
+  Version 0.1 - BMP085 + DHT22 + 433MHz Tx
+
+*/  
+
 #include "Wire.h"
 #include "Adafruit_BMP085.h"
+#include "DHT.h"
 #include "VirtualWire.h"
 
-Adafruit_BMP085 bmp085;
+#define dhtPIN  2
+#define DHTTYPE DHT11
+
 const int ledPin = 13;
+
+Adafruit_BMP085 bmp085;
+DHT dht(dhtPIN, DHTTYPE);
 
 void setup() {
     Serial.begin(9600);
@@ -69,10 +90,40 @@ void loop() {
     Serial.print(bmp085.readAltitude());
     Serial.println(" meters");
     
+    // Read temperature and humidity
+    float humidity = dht.readHumidity();
+    float temperature_dht = dht.readTemperature();
+
+    if (isnan(temperature_dht) || isnan(humidity)) {
+        Serial.println("Failed to read from DHT");
+    } else {
+        Serial.print("Humidity: "); 
+        Serial.print(humidity);
+        Serial.println(" %\t");
+        Serial.print("Temperature: "); 
+        Serial.print(temperature_dht);
+        Serial.println(" C");
+
+        // Transmit temperature and humidity
+        char chrBufferTp1[10];
+        String temperature = "Ta" + String(dtostrf(temperature_dht, 3, 2, chrBufferTp1));
+        char strBufferTp1[10];
+        temperature.toCharArray(strBufferTp1, 10);
+        vw_send((uint8_t *)strBufferTp1, strlen(strBufferTp1));
+        vw_wait_tx(); // Wait until the message has been sent
+
+        char chrBufferHumidity[10];
+        String humidity = "H" + String(dtostrf(dht.readHumidity(), 3, 2, chrBufferHumidity));
+        char strBufferHumidity[10];
+        humidity.toCharArray(strBufferHumidity, 10);
+        vw_send((uint8_t *)strBufferHumidity, strlen(strBufferHumidity));
+        vw_wait_tx(); // Wait until the message has been sent            
+    }     
+
     // Transmit 
     // dtostrf(floatVar, minStringWidthIncDecimalPoint, numVarsAfterDecimal, charBuf);
     char test[10];
-    String temperature = "T" + String(dtostrf(bmp085.readTemperature(), 3, 2, test));
+    String temperature = "Tb" + String(dtostrf(bmp085.readTemperature(), 3, 2, test));
     char strBufferTemperature[10];
     temperature.toCharArray(strBufferTemperature, 10);
     vw_send((uint8_t *)strBufferTemperature, strlen(strBufferTemperature));
@@ -90,4 +141,5 @@ void loop() {
     
     delay(10000); // Send every 10 seconds
 }
+
 

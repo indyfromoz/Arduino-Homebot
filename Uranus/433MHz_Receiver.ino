@@ -30,6 +30,13 @@
            GND = ground rail
 */
 
+/* 
+
+  Current version: 0.1
+  Version 0.1 - 433MHz Rx
+
+*/ 
+
 #include "VirtualWire.h"
 
 
