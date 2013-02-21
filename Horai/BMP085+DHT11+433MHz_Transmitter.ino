@@ -49,7 +49,7 @@
 
 /* 
 
-  Current version: 0.1
+  Current version: 0.2
   Version 0.1 - BMP085 + DHT22 + 433MHz Tx
   Version 0.2 - Updated message format, merged all params into one
 
