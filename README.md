@@ -12,3 +12,7 @@ Project Homebot is a home automation experiment. It consists of 'bots' that send
 
 Remote units consists of an Arduino Nano v3.0, one or more sensors and a 433MHz transmitter. *Horai* consists of DHT11 or DHT22 for humidity measurement and BMP085 for temperature and pressure measure. 
 
+#### Data 
+
+Three datastreams are available in a COSM feed - <https://cosm.com/feeds/106000>. The data originates from a DHT11 and a BMP085.
+
