@@ -51,6 +51,7 @@
 
   Current version: 0.1
   Version 0.1 - BMP085 + DHT22 + 433MHz Tx
+  Version 0.2 - Updated message format, merged all params into one
 
 */  
 
@@ -78,17 +79,7 @@ void loop() {
     delay(250);
     digitalWrite(ledPin, false);
     
-    Serial.print("Temperature = ");
-    Serial.print(bmp085.readTemperature());
-    Serial.println(" C");
-    
-    Serial.print("Pressure = ");
-    Serial.print(bmp085.readPressure());
-    Serial.println(" Pa");
-    
-    Serial.print("Altitude = ");
-    Serial.print(bmp085.readAltitude());
-    Serial.println(" meters");
+    String stringToTransmit;
     
     // Read temperature and humidity
     float humidity = dht.readHumidity();
@@ -107,33 +98,29 @@ void loop() {
         // Transmit temperature and humidity
         char chrBufferTp1[10];
         String temperature = "Ta" + String(dtostrf(temperature_dht, 3, 2, chrBufferTp1));
-        char strBufferTp1[10];
-        temperature.toCharArray(strBufferTp1, 10);
-        vw_send((uint8_t *)strBufferTp1, strlen(strBufferTp1));
-        vw_wait_tx(); // Wait until the message has been sent
-
+        stringToTransmit += temperature;
+ 
         char chrBufferHumidity[10];
         String humidity = "H" + String(dtostrf(dht.readHumidity(), 3, 2, chrBufferHumidity));
-        char strBufferHumidity[10];
-        humidity.toCharArray(strBufferHumidity, 10);
-        vw_send((uint8_t *)strBufferHumidity, strlen(strBufferHumidity));
-        vw_wait_tx(); // Wait until the message has been sent            
+        stringToTransmit += humidity;        
     }     
 
     // Transmit 
     // dtostrf(floatVar, minStringWidthIncDecimalPoint, numVarsAfterDecimal, charBuf);
     char test[10];
     String temperature = "Tb" + String(dtostrf(bmp085.readTemperature(), 3, 2, test));
-    char strBufferTemperature[10];
-    temperature.toCharArray(strBufferTemperature, 10);
-    vw_send((uint8_t *)strBufferTemperature, strlen(strBufferTemperature));
-    vw_wait_tx(); // Wait until the message has been sent
-    
+    stringToTransmit += temperature;
+        
     String pressure = "P" + String(bmp085.readPressure());
-    char strBufferPressure[10];
-    pressure.toCharArray(strBufferPressure, 10);
-    vw_send((uint8_t *)strBufferPressure, strlen(strBufferPressure));
-    vw_wait_tx(); // Wait until the message has been sent    
+    stringToTransmit += pressure;
+        
+    // Message has been constructed, now transmit
+    char strBufferToTransmit[VW_MAX_MESSAGE_LEN];
+    stringToTransmit.toCharArray(strBufferToTransmit, VW_MAX_MESSAGE_LEN);
+    vw_send((uint8_t *)strBufferToTransmit, strlen(strBufferToTransmit));
+    vw_wait_tx(); // Wait until the message has been sent            
+    Serial.print("Transmitted message: ");
+    Serial.println(stringToTransmit);
     
     digitalWrite(ledPin, true);
     delay(250);
