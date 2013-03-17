@@ -16,3 +16,16 @@ Remote units consists of an Arduino Nano v3.0, one or more sensors and a 433MHz 
 
 Three datastreams are available in a COSM feed - <https://cosm.com/feeds/106000>. The data originates from a DHT11 and a BMP085.
 
+#### Compiling _Uranus_
+
+You will need to obtain your own COSM API key to be able to use the COSM transmitter source in _433MHz_Ethernet+COSM_Receiver.ino_. Create a file called _APIKey.h_, define two parameters - 
+
+```
+#define API_KEY "YOUR_API_KEY" // Cosm API key
+#define FEED_ID YOUR_FEED_ID   // Cosm feed ID
+```
+
+Compile and deply the code. The Ethernet cable should be plugged in before the Arduino is powered on. 
+
+Feel free to contact me at - [indyfromoz@gmail.com](indyfromoz@gmail.com) if you have questions. 
+

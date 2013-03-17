@@ -52,8 +52,7 @@
 #include <Cosm.h>
 #include "VirtualWire.h"
 
-#define API_KEY "TeQB867BAlZsm62Nd1xgca06PLSSAKw4cTJLUTU4NmlqST0g" // your Cosm API key
-#define FEED_ID 106000 // your Cosm feed ID
+#include "APIKeys.h"
 
 const int ledPIN = 13;
 char MessageBuffer[VW_MAX_MESSAGE_LEN]; 
